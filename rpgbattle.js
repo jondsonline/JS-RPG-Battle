@@ -70,54 +70,91 @@ class Player extends Creature {
 var pc = new Player(20, 6, 6);
 var monster = new Creature(12, 6, 5);
 
-contant combatAction = {
-  ATTACK: 'attack',
-  HEAL: 'heal',
-  FLEE: 'flee'
-}
+var headerMessageText;
+var gameMessageText;
+var combatRound = 1;
+var gameContinues = true;   // is this even needed?
 
-/* THE GAME ROUTINE */
+/* THE GAME FLOW */
+
+/* displayIntro() -- headertext ID with a paragraph to explain the game
+                     also sets up buttonMenu with "Begin play" button.
 
 
-var gameContinues = true;
+  onClick, begin play -- sets up combatant message, switches header text to
+                      round info, gameMessage says something like "Select your
+                      action." buttonMenu displays combat actions
 
-while (gameContinues) {
+                      setupNewCombat()
+                        displayRoundHeader()
+                        displayNewStats()
+                          updatePlayerHP()
+                          updateMonster(HP)
+                        displayCombatMenu()
 
-  var combatContinues = true;
-  var combatRound = 0;
-  var playerLevelsUp = true;
+  NEW MENU/DISPLAY -- COMBAT
 
-  while (combatContinues) {
+  onClick, attack -- Player attacks, new message to header text, check if
+                    monster alive, monster attacks, new message to header text,
+                    check if player alive. End combat as appropriate and
+                    display game over or new round info
 
-    combatRound += 1;
-    var playingAnotherRound = true;
+                    actionAttack()
+                      playerAttacks()
+                      monsterAttacks()
+                      updateCombatRound()
+                        displayRoundHeader()
+                        updatePlayerHP()
+                        updateMonsterHP()
+                        displayGameMessage()
+                      if player dies: displayPlayNewGameMenu()
+                      if monster dies: displayNewEncounterMenu()
+                      if continues: Already taken care of!
 
-    displayRoundHeader();
-    displayCombatantInfo();
-    displayCombatButtons();
+  onlick, heal -- Player heals, check for backfire and death. Monster attacks.
+                  Check for death. End combat as appropriate.
 
-    while (playingAnotherRound) {
-      var selectAction = getAction();
+                  actionHeal()
+                    playerHeals()
+                      if die: updateCombatRound()*
+                              displayNewGameMenu()
+                    monsterAttacks()
+                    updateCombatRound()*
+                    if continues: keep menus
 
-      // NOTE: action routines must reutrn boolean about
-      // whether player or monster is dead
+  onclick, flee -- Monster gets free attack. If survive, end combat and
+                  continue without leveling up.
 
-      switch (selectAction) {
-        case combatAction.ATTACK:
-          playingAnotherRound = playerAttacks();
-          break;
-        case combatAction.HEAL:
-          playingAnotherRound = playerHeals();
-          break;
-        case combatAction.FLEE;
-          playingAnotherRound = playerFlees();
-          break;
-      } // switch selectAction
+                  actionFlee()
+                    monsterAttacks()
+                    updateCombatRound()*
+                    if player dies: displayPlayNewGameMenu()
+                    if player survives: displayNewEncounterMenu()
 
-    }  // playingAnotherRound
+  END COMBAT MENUS
 
-    combatContinues = false;
+  onclick, level up -- go through level up routine.
+                  display what levels up in headerMessage/gameMessage
+                  instantly update combat stats, do new round buttonMenu
 
-  } // combatContinues
+                  playerLevelsUp()
+                  monsterLevelsUP()
+                  combatRound = 1
+                  setupNewCombat()*
 
-} // gameContinues
+  onclick, new encounter -- survival after fleeing
+
+                  monsterLevelsUp()
+                  combatRound = 1
+                  setupNewCombat()*
+
+  END GAME MENUS
+
+  onclick, play again -- reset player and monster info. begin new combat
+                  round
+
+                  resetCombatantStats()
+                  combatRound = 1
+                  setupNewCombat()*
+
+*/
