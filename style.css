@@ -1,5 +1,34 @@
 * { margin: 0px; padding: 0px;}
 
-header, main {
+main {
   display: block;
+  background-color: Black;
+}
+
+#display {
+  background-color: DarkGrey;
+  color: Black;
+  width: 1000px;
+  margin: auto;
+  vertical-align: middle;
+  padding: 100px 0px;
+}
+
+h1 {
+  font-size: 3em;
+  text-align: center;
+  padding: 40px 0px;
+}
+
+h2 {
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+p {
+  padding: 5px 20px;
+}
+
+#buttonMenu {
+  text-align: center;
 }

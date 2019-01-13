@@ -75,11 +75,60 @@ var gameMessageText;
 var combatRound = 1;
 var gameContinues = true;   // is this even needed?
 
-/* THE GAME FLOW */
 
-/* displayIntro() -- headertext ID with a paragraph to explain the game
+function displayRoundHeader() {
+  roundHeader = document.getElementById("headerMessage");
+  roundHeader.innerHTML = "<h2>Round " + combatRound + "</h2>";
+}
+
+
+function setupNewCombat() {
+  alert("in setupNewCombat");
+  displayRoundHeader();
+  // displayNewStats();
+  // displayCombatMenu();
+}
+
+// INTRO SCREEN TO THE GAME
+
+function displayIntro() {
+  var introMessage = document.getElementById("headerMessage");
+
+  introMessage.innerHTML = "<h2>Welcome to the game!</h2>" +
+    "<p>RPG Battle is a basic game where you battle against various opponents" +
+    "and level up each time you achieve a victory.<p>" +
+    "<p>Each round, you may attack, heal or flee. If you attack, you have a" +
+    "hance to hit your opponent and cause damage. If you choose to heal, you" +
+    "cast a heal spell, which has a slight chance of backfiring. If it does," +
+    "instead of healing you take one point of damage. If you choose to flee," +
+    "the opponent gets an extra attack, and if you survive, battle ends.<p>" +
+    "<p>And the end of each combat encounter, you gain a level if you survive" +
+    "and did not flee. Leveling up increases your stats.<p>" +
+    "<p>Each encounter, the opponent gets stronger and more difficult to" +
+    "defeat. See how many encounters you can survive!<p>";
+
+  var startMenu = document.getElementById("buttonMenu");
+
+  var beginPlayButton = document.createElement('button');
+  var buttonText = document.createTextNode("Click to play!")
+  beginPlayButton.appendChild(buttonText);
+  beginPlayButton.onclick = function() {
+    setupNewCombat();
+  }
+
+  startMenu.appendChild(beginPlayButton);
+
+} // displayIntro
+
+
+displayIntro();
+
+
+
+/* THE GAME FLOW
+
+ displayIntro() -- headertext ID with a paragraph to explain the game
                      also sets up buttonMenu with "Begin play" button.
-
 
   onClick, begin play -- sets up combatant message, switches header text to
                       round info, gameMessage says something like "Select your
@@ -91,6 +140,7 @@ var gameContinues = true;   // is this even needed?
                           updatePlayerHP()
                           updateMonster(HP)
                         displayCombatMenu()
+
 
   NEW MENU/DISPLAY -- COMBAT
 
