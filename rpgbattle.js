@@ -3,6 +3,7 @@
 
 class Creature {
   constructor(hp, ac, dam) {
+    this.level = 1;
     this.maxHitPoints = hp;
     this.hitPoints = hp;
     this.armorClass = ac;
@@ -41,7 +42,6 @@ class Player extends Creature {
   constructor(hp, ac, dam) {
     super(hp, ac, dam);
     this.healing = 5;
-    this.level = 1;
   }
 }
 
@@ -76,18 +76,120 @@ var combatRound = 1;
 var gameContinues = true;   // is this even needed?
 
 
+function actionAttack() {
+  alert("Kill! Kill! Kill!");
+}
+
+
+function actionHeal() {
+  alert("Ahh, that's better");
+}
+
+
+function actionFlee() {
+  alert("Run away! Run away!");
+}
+
+
 function displayRoundHeader() {
   roundHeader = document.getElementById("headerMessage");
   roundHeader.innerHTML = "<h2>Round " + combatRound + "</h2>";
+
+  tableHeader = document.getElementById('tableHeader');
+  tableHeader.innerHTML = "<th>Player - Level " + pc.level + "</th>" +
+                          "<th>Monster - Level " + monster.level + "</th>";
 }
 
+
+function displayCombatMenu() {
+  buttonMenu = document.getElementById('buttonMenu');
+  buttonMenu.innerHTML = " ";
+
+  // Attack Button
+  var attackButton = document.createElement('button');
+  var attackButtonText = document.createTextNode('Attack');
+  attackButton.appendChild(attackButtonText);
+  attackButton.onclick = function() {
+    actionAttack();
+  }
+  buttonMenu.appendChild(attackButton);
+
+  // Heal Button
+  var healButton = document.createElement('button');
+  var healButtonText = document.createTextNode('Heal');
+  healButton.appendChild(healButtonText);
+  healButton.onclick = function() {
+    actionHeal();
+  }
+  buttonMenu.appendChild(healButton);
+
+  // Flee button
+  var fleeButton = document.createElement('button');
+  var fleeButtonText = document.createTextNode('Flee');
+  fleeButton.appendChild(fleeButtonText);
+  fleeButton.onclick = function() {
+    actionFlee();
+  }
+  buttonMenu.appendChild(fleeButton);
+
+} // displayCombatMenu()
+
+
+function displayGameMessage(message) {
+  gameMessage = document.getElementById("gameMessage");
+  gameMessage.innerHTML = "<p>" + message + "</p>";
+}
+
+
+function updatePlayerStats() {
+  playerStats = document.getElementById('playerStats');
+
+  playerStats.innerHTML = "<ul>" +
+                            "<li>Damage: 1d" + pc.attackDamage + "</li>" +
+                            "<li>Armor Class: " + pc.armorClass + "</li>" +
+                            "<li>Healing: 1d" + pc.healing + "</li>" +
+                          "</ul>";
+}
+
+
+function updatePlayerHP() {
+  playerHP = document.getElementById('playerHP');
+  playerHP.innerHTML = "<p>Hit Points: " + pc.hitPoints + "<p>";
+}
+
+
+function updateMonsterStats() {
+  monsterStats = document.getElementById('monsterStats');
+
+  monsterStats.innerHTML = "<ul>" +
+                            "<li>Damage: 1d" + monster.attackDamage + "</li>" +
+                            "<li>Armor Class: " + monster.armorClass + "</li>" +
+                          "</ul>";
+
+}
+
+
+function updateMonsterHP() {
+  monsterHP = document.getElementById('monsterHP');
+  monsterHP.innerHTML = "<p>Hit Points: " + monster.hitPoints + "<p>";
+}
+
+
+function displayNewStats() {
+  updatePlayerStats();
+  updatePlayerHP();
+
+  updateMonsterStats();
+  updateMonsterHP();
+}
 
 function setupNewCombat() {
-  alert("in setupNewCombat");
   displayRoundHeader();
-  // displayNewStats();
-  // displayCombatMenu();
+  displayNewStats();
+  displayGameMessage("Let the batttle begin!");
+  displayCombatMenu();
 }
+
 
 // INTRO SCREEN TO THE GAME
 
@@ -107,8 +209,6 @@ function displayIntro() {
     "<p>Each encounter, the opponent gets stronger and more difficult to" +
     "defeat. See how many encounters you can survive!<p>";
 
-  var startMenu = document.getElementById("buttonMenu");
-
   var beginPlayButton = document.createElement('button');
   var buttonText = document.createTextNode("Click to play!")
   beginPlayButton.appendChild(buttonText);
@@ -116,14 +216,15 @@ function displayIntro() {
     setupNewCombat();
   }
 
+  var startMenu = document.getElementById("buttonMenu");
   startMenu.appendChild(beginPlayButton);
 
 } // displayIntro
 
 
+/* START GAME */
+
 displayIntro();
-
-
 
 /* THE GAME FLOW
 
@@ -138,7 +239,7 @@ displayIntro();
                         displayRoundHeader()
                         displayNewStats()
                           updatePlayerHP()
-                          updateMonster(HP)
+                          updateMonsterHP()
                         displayCombatMenu()
 
 
@@ -156,7 +257,7 @@ displayIntro();
                         displayRoundHeader()
                         updatePlayerHP()
                         updateMonsterHP()
-                        displayGameMessage()
+                        updateGameMessage()
                       if player dies: displayPlayNewGameMenu()
                       if monster dies: displayNewEncounterMenu()
                       if continues: Already taken care of!
