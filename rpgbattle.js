@@ -68,76 +68,32 @@ class Player extends Creature {
 */
 
 var pc = new Player(20, 6, 6);
-var monster = new Creature(12, 6, 5);
+var monster = new Creature(1, 6, 5); // 12 7 5
 
 var headerMessageText;
 var gameMessageText;
-var combatRound = 1;
+var combatRound = 0;
 var gameContinues = true;   // is this even needed?
 
 
-function actionAttack() {
-  alert("Kill! Kill! Kill!");
+function createButton(buttonText) {
+  var newButton = document.createElement('button');
+  var newButtonText = document.createTextNode(buttonText);
+  newButton.appendChild(newButtonText);
+
+  return newButton;
 }
 
 
-function actionHeal() {
-  alert("Ahh, that's better");
+function addButton(newButton) {
+  var buttonMenu = document.getElementById('buttonMenu');
+  buttonMenu.appendChild(newButton)
 }
 
 
-function actionFlee() {
-  alert("Run away! Run away!");
-}
-
-
-function displayRoundHeader() {
-  roundHeader = document.getElementById("headerMessage");
-  roundHeader.innerHTML = "<h2>Round " + combatRound + "</h2>";
-
-  tableHeader = document.getElementById('tableHeader');
-  tableHeader.innerHTML = "<th>Player - Level " + pc.level + "</th>" +
-                          "<th>Monster - Level " + monster.level + "</th>";
-}
-
-
-function displayCombatMenu() {
-  buttonMenu = document.getElementById('buttonMenu');
+function clearButtonMenu() {
+  var buttonMenu = document.getElementById('buttonMenu');
   buttonMenu.innerHTML = " ";
-
-  // Attack Button
-  var attackButton = document.createElement('button');
-  var attackButtonText = document.createTextNode('Attack');
-  attackButton.appendChild(attackButtonText);
-  attackButton.onclick = function() {
-    actionAttack();
-  }
-  buttonMenu.appendChild(attackButton);
-
-  // Heal Button
-  var healButton = document.createElement('button');
-  var healButtonText = document.createTextNode('Heal');
-  healButton.appendChild(healButtonText);
-  healButton.onclick = function() {
-    actionHeal();
-  }
-  buttonMenu.appendChild(healButton);
-
-  // Flee button
-  var fleeButton = document.createElement('button');
-  var fleeButtonText = document.createTextNode('Flee');
-  fleeButton.appendChild(fleeButtonText);
-  fleeButton.onclick = function() {
-    actionFlee();
-  }
-  buttonMenu.appendChild(fleeButton);
-
-} // displayCombatMenu()
-
-
-function displayGameMessage(message) {
-  gameMessage = document.getElementById("gameMessage");
-  gameMessage.innerHTML = "<p>" + message + "</p>";
 }
 
 
@@ -154,7 +110,8 @@ function updatePlayerStats() {
 
 function updatePlayerHP() {
   playerHP = document.getElementById('playerHP');
-  playerHP.innerHTML = "<p>Hit Points: " + pc.hitPoints + "<p>";
+  playerHP.innerHTML = "<p>Hit Points: " + pc.hitPoints + "/" +
+                        pc.maxHitPoints + "<p>";
 }
 
 
@@ -165,13 +122,23 @@ function updateMonsterStats() {
                             "<li>Damage: 1d" + monster.attackDamage + "</li>" +
                             "<li>Armor Class: " + monster.armorClass + "</li>" +
                           "</ul>";
-
 }
 
 
 function updateMonsterHP() {
   monsterHP = document.getElementById('monsterHP');
-  monsterHP.innerHTML = "<p>Hit Points: " + monster.hitPoints + "<p>";
+  monsterHP.innerHTML = "<p>Hit Points: " + monster.hitPoints + "/" +
+                        monster.maxHitPoints + "<p>";
+}
+
+
+function displayRoundHeader() {
+  roundHeader = document.getElementById("headerMessage");
+  roundHeader.innerHTML = "<h2>Round " + combatRound + "</h2>";
+
+  tableHeader = document.getElementById('tableHeader');
+  tableHeader.innerHTML = "<th>Player - Level " + pc.level + "</th>" +
+                          "<th>Monster - Level " + monster.level + "</th>";
 }
 
 
@@ -182,6 +149,180 @@ function displayNewStats() {
   updateMonsterStats();
   updateMonsterHP();
 }
+
+
+function updateCombatRound() {
+    combatRound += 1;
+    displayRoundHeader();
+    updatePlayerHP();
+    updateMonsterHP();
+}
+
+
+function startNewRound() {
+  combatRound = 0;
+  displayRoundHeader();
+  displayNewStats();
+  displayGameMessage("Let the battle begin!");
+  displayCombatMenu();
+}
+
+function playerLevelsUp() {
+  pc.level += 1;
+
+  var increasedStat = Math.floor((Math.random() * 10) + 1);
+
+  if (increasedStat >= 1 || increasedStat <= 5) {
+    var hpIncrease = Math.floor((Math.random() * 4) + 2);
+    pc.maxHitPoints += hpIncrease;
+    pc.hitPoints = pc.maxHitPoints;
+  } else if (increasedStat >= 6 || increasedStat <= 8) {
+    pc.attackDamage += 1;
+  } else if (increasedStat == 9) {
+    pc.healing += 1
+  } else {
+    if (pc.armorClass < 8) {
+      pc.armorClass += 1;
+    } else {
+      pc.maxHitPoints += 6;
+      pc.hitPoints = pc.maxHitPoints;
+    }
+  }
+}
+
+
+function monsterLevelsUp() {
+  monster.level += 1;
+  monster.alive = true;
+  var monsterHPIncrease = Math.floor((Math.random() * 3) + 2);
+  monster.maxHitPoints += monsterHPIncrease;
+  monster.hitPoints = monster.maxHitPoints;
+  var attackIncreaseChance = Math.floor((Math.random() *2) + 1);
+  if (attackIncreaseChance == 2) {
+    monster.attackDamage += 1;
+  }
+}
+
+
+function levelUp() {
+  playerLevelsUp();
+  monsterLevelsUp();
+  startNewRound();
+}
+
+
+function displayGameMessage(message) {
+  gameMessage = document.getElementById("gameMessage");
+  gameMessage.innerHTML = "<p>" + message + "</p>";
+}
+
+
+function playerAttacks() {
+  var playerHits = pc.toHit(monster.armorClass);
+
+  if (playerHits == true) {
+    damage = pc.damageRoll()
+    gameMessageText = "You hit the monster for " + damage + " point(s) of " +
+                      "damage.";
+    monster.takeDamage(damage);
+  } else {
+    gameMessageText = "You miss!";
+  }
+} // playerAttacks()
+
+
+function monsterAttacks() {
+  var monsterHits = monster.toHit(pc.armorClass);
+
+  if (monsterHits == true) {
+    damage = monster.damageRoll()
+    gameMessageText += "<br>The monster hits you for " + damage + " point(s) of " +
+                      "damage.";
+    pc.takeDamage(damage);
+  } else {
+    gameMessageText += "<br>The monster misses!";
+  }
+}
+
+
+function displayDeathMenu() {
+  clearButtonMenu();
+  var deathButton = createButton("Play Again");
+  deathButton.onclick = function() {
+    alert("Play new game!");
+  }
+  addButton(deathButton);
+}
+
+
+function displaySurvivalMenu() {
+  clearButtonMenu();
+  var survivalButton = createButton("Play Another Round");
+  survivalButton.onclick = function() {
+    levelUp();
+  }
+  addButton(survivalButton);
+}
+
+
+function actionAttack() {
+  playerAttacks();
+  if (monster.alive) {
+
+    monsterAttacks();
+    if (!pc.alive) {
+      gameMessageText += "<br>You are killed!";
+      displayDeathMenu();
+    }
+
+  } else {
+
+    gameMessageText += "<br>The monster is killed!";
+    displaySurvivalMenu();
+
+  }
+  displayGameMessage(gameMessageText);
+  updateCombatRound();
+}
+
+
+function actionHeal() {
+  alert("Ahh, that's better");
+}
+
+
+function actionFlee() {
+  alert("Run away! Run away!");
+}
+
+
+function displayCombatMenu() {
+  clearButtonMenu();
+
+  // Attack Button
+
+  var attackButton = createButton("Attack");
+  attackButton.onclick = function() {
+    actionAttack();
+  }
+  addButton(attackButton);
+
+  // Heal Button
+  var healButton = createButton("Heal");;
+  healButton.onclick = function() {
+    actionHeal();
+  }
+  addButton(healButton);
+
+  // Flee button
+  var fleeButton = createButton("Flee")
+  fleeButton.onclick = function() {
+    actionFlee();
+  }
+  addButton(fleeButton);
+
+} // displayCombatMenu()
+
 
 function setupNewCombat() {
   displayRoundHeader();
@@ -209,16 +350,11 @@ function displayIntro() {
     "<p>Each encounter, the opponent gets stronger and more difficult to" +
     "defeat. See how many encounters you can survive!<p>";
 
-  var beginPlayButton = document.createElement('button');
-  var buttonText = document.createTextNode("Click to play!")
-  beginPlayButton.appendChild(buttonText);
+  var beginPlayButton = createButton("Click to play!");
   beginPlayButton.onclick = function() {
     setupNewCombat();
   }
-
-  var startMenu = document.getElementById("buttonMenu");
-  startMenu.appendChild(beginPlayButton);
-
+  addButton(beginPlayButton);
 } // displayIntro
 
 
