@@ -45,38 +45,44 @@ class Player extends Creature {
   }
 }
 
-/*
-  heal() {
-    var healChance = Math.floor((Math.random() * 5) + 1);
+const stat = {
+  pcHP: 20,
+  pcAC: 6,
+  pcDamage: 6,
+  monsterHP: 12,
+  monsterAC: 6,
+  monsterDamage: 5
+};
 
-    if (healChance == this.healing) {
-      // output: "The healing spell backfires! You take 1 point of damage!"
-      this.takeDamage(1);
-    } else {
-      this.hitPoints += healChance;
-      if (this.hitPoints > this.maxHitPoints) {
-        this.hitPoints = this.maxHitPoints;
-      }
-    }
-  }
-
-  levelUp() {
-    this.level += 1;
-    // outPut:
-  }
-}
-*/
-
-var pc = new Player(20, 6, 6);
-var monster = new Creature(1, 6, 5); // 12 7 5
+var pc = new Player(stat.pcHP, stat.pcAC, stat.pcDamage);
+var monster = new Creature(stat.monsterHP, stat.monsterAC, stat.monsterDamage);
 
 var headerMessageText;
 var gameMessageText;
 var combatRound = 0;
 var gameContinues = true;   // is this even needed?
+var doesPlayerLevelUp = true;
 
 
-function createButton(buttonText) {
+function resetStats() {
+  combatRound = 0;
+
+  pc.alive = true;
+  pc.level = 1;
+  pc.maxHitPoints = stat.pcHP;
+  pc.hitPoints = pc.maxHitPoints;
+  pc.armorClass = stat.pcAC;
+  pc.damage = stat.pcDamage;
+
+  monster.level = 1;
+  monster.maxHitPoints = stat.monsterHP;
+  monster.hitPoints = monster.maxHitPoints;
+  monster.armorClass = stat.monsterAC;
+  monster.damage = stat.monsterDamage;
+}
+
+
+function defineButton(buttonText) {
   var newButton = document.createElement('button');
   var newButtonText = document.createTextNode(buttonText);
   newButton.appendChild(newButtonText);
@@ -167,6 +173,7 @@ function startNewRound() {
   displayCombatMenu();
 }
 
+
 function playerLevelsUp() {
   pc.level += 1;
 
@@ -205,7 +212,10 @@ function monsterLevelsUp() {
 
 
 function levelUp() {
-  playerLevelsUp();
+  if (doesPlayerLevelUp) {
+    playerLevelsUp();
+  }
+  doesPlayerLevelUp = true;
   monsterLevelsUp();
   startNewRound();
 }
@@ -228,7 +238,7 @@ function playerAttacks() {
   } else {
     gameMessageText = "You miss!";
   }
-} // playerAttacks()
+}
 
 
 function monsterAttacks() {
@@ -245,11 +255,29 @@ function monsterAttacks() {
 }
 
 
+function playerHeals() {
+  healChance = Math.floor((Math.random() * pc.healing) + 1);
+
+  if (healChance == pc.healing) {
+    gameMessageText = "The healing spell backfires! You take 1 point of " +
+                      " damage!";
+    pc.takeDamage(1);
+  } else {
+    pc.hitPoints += healChance;
+    if (pc.hitPoints > pc.maxHitPoints) {
+      pc.hitPoints = pc.maxHitPoints
+    }
+    gameMessageText = "You healing spell heals " + healChance + " hit points.";
+  }
+}
+
+
 function displayDeathMenu() {
   clearButtonMenu();
-  var deathButton = createButton("Play Again");
+  var deathButton = defineButton("Play Again");
   deathButton.onclick = function() {
-    alert("Play new game!");
+    resetStats();
+    setupNewCombat();
   }
   addButton(deathButton);
 }
@@ -257,7 +285,7 @@ function displayDeathMenu() {
 
 function displaySurvivalMenu() {
   clearButtonMenu();
-  var survivalButton = createButton("Play Another Round");
+  var survivalButton = defineButton("Play Another Round");
   survivalButton.onclick = function() {
     levelUp();
   }
@@ -265,21 +293,22 @@ function displaySurvivalMenu() {
 }
 
 
+function checkIfPlayerAlive() {
+  if (!pc.alive) {
+    gameMessageText += "<br>You are killed!";
+    displayDeathMenu();
+  }
+}
+
+
 function actionAttack() {
   playerAttacks();
   if (monster.alive) {
-
     monsterAttacks();
-    if (!pc.alive) {
-      gameMessageText += "<br>You are killed!";
-      displayDeathMenu();
-    }
-
+    checkIfPlayerAlive();
   } else {
-
     gameMessageText += "<br>The monster is killed!";
     displaySurvivalMenu();
-
   }
   displayGameMessage(gameMessageText);
   updateCombatRound();
@@ -287,12 +316,26 @@ function actionAttack() {
 
 
 function actionHeal() {
-  alert("Ahh, that's better");
+  playerHeals();
+  checkIfPlayerAlive();
+  monsterAttacks();
+  checkIfPlayerAlive();
+  displayGameMessage(gameMessageText);
+  updateCombatRound();
 }
 
 
 function actionFlee() {
-  alert("Run away! Run away!");
+  doesPlayerLevelUp = false;
+  gameMessageText = "You attempt to flee from battle!";
+  monsterAttacks();
+  checkIfPlayerAlive();
+  updateCombatRound();
+  if (pc.alive) {
+    gameMessageText += "<br>You escape!";
+    displaySurvivalMenu();
+  }
+  displayGameMessage(gameMessageText);
 }
 
 
@@ -301,21 +344,21 @@ function displayCombatMenu() {
 
   // Attack Button
 
-  var attackButton = createButton("Attack");
+  var attackButton = defineButton("Attack");
   attackButton.onclick = function() {
     actionAttack();
   }
   addButton(attackButton);
 
   // Heal Button
-  var healButton = createButton("Heal");;
+  var healButton = defineButton("Heal");;
   healButton.onclick = function() {
     actionHeal();
   }
   addButton(healButton);
 
   // Flee button
-  var fleeButton = createButton("Flee")
+  var fleeButton = defineButton("Flee")
   fleeButton.onclick = function() {
     actionFlee();
   }
@@ -350,7 +393,7 @@ function displayIntro() {
     "<p>Each encounter, the opponent gets stronger and more difficult to" +
     "defeat. See how many encounters you can survive!<p>";
 
-  var beginPlayButton = createButton("Click to play!");
+  var beginPlayButton = defineButton("Click to play!");
   beginPlayButton.onclick = function() {
     setupNewCombat();
   }
