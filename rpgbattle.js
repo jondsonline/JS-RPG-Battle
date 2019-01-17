@@ -45,6 +45,7 @@ class Player extends Creature {
   }
 }
 
+// Starting stats (Level 1) for both combatants
 const stat = {
   pcHP: 20,
   pcAC: 6,
@@ -60,9 +61,9 @@ var monster = new Creature(stat.monsterHP, stat.monsterAC, stat.monsterDamage);
 var headerMessageText;
 var gameMessageText;
 var combatRound = 0;
-var gameContinues = true;   // is this even needed?
+// var gameContinues = true;   // is this even needed?
 var doesPlayerLevelUp = true;
-
+var fleeChances = Math.floor((Math.random() * 4) + 2);
 
 function resetStats() {
   combatRound = 0;
@@ -246,8 +247,8 @@ function monsterAttacks() {
 
   if (monsterHits == true) {
     damage = monster.damageRoll()
-    gameMessageText += "<br>The monster hits you for " + damage + " point(s) of " +
-                      "damage.";
+    gameMessageText += "<br>The monster hits you for " + damage + " point(s) " +
+                      " of damage.";
     pc.takeDamage(damage);
   } else {
     gameMessageText += "<br>The monster misses!";
@@ -274,7 +275,7 @@ function playerHeals() {
 
 function displayDeathMenu() {
   clearButtonMenu();
-  var deathButton = defineButton("Play Again");
+  var deathButton = defineButton("Play a New Game");
   deathButton.onclick = function() {
     resetStats();
     setupNewCombat();
@@ -285,7 +286,7 @@ function displayDeathMenu() {
 
 function displaySurvivalMenu() {
   clearButtonMenu();
-  var survivalButton = defineButton("Play Another Round");
+  var survivalButton = defineButton("Battle Again");
   survivalButton.onclick = function() {
     levelUp();
   }
@@ -335,6 +336,12 @@ function actionFlee() {
     gameMessageText += "<br>You escape!";
     displaySurvivalMenu();
   }
+  fleeChances -= 1;
+  if (fleeChances == 0) {
+    gameMessageText += "<br>After fleeing so many battles, you are disgraced." +
+                      "<br>You are forbidden from returning to the arena!";
+    displayDeathMenu();
+  }
   displayGameMessage(gameMessageText);
 }
 
@@ -382,16 +389,18 @@ function displayIntro() {
 
   introMessage.innerHTML = "<h2>Welcome to the game!</h2>" +
     "<p>RPG Battle is a basic game where you battle against various opponents" +
-    "and level up each time you achieve a victory.<p>" +
-    "<p>Each round, you may attack, heal or flee. If you attack, you have a" +
-    "hance to hit your opponent and cause damage. If you choose to heal, you" +
-    "cast a heal spell, which has a slight chance of backfiring. If it does," +
+    " and level up each time you achieve a victory.</p>" +
+    "<p>Each round, you may attack, heal or flee. If you attack, you have a " +
+    "chance to hit your opponent and cause damage. If you choose to heal, you " +
+    "cast a heal spell, which has a slight chance of backfiring. If it does, " +
     "instead of healing you take one point of damage. If you choose to flee," +
-    "the opponent gets an extra attack, and if you survive, battle ends.<p>" +
-    "<p>And the end of each combat encounter, you gain a level if you survive" +
-    "and did not flee. Leveling up increases your stats.<p>" +
-    "<p>Each encounter, the opponent gets stronger and more difficult to" +
-    "defeat. See how many encounters you can survive!<p>";
+    "the opponent gets an extra attack, and if you survive, battle ends. " +
+    "There are a limited amount of times you can flee from battle before " +
+    "you are disgraced and ejected from the competition.</p>" +
+    "<p>And the end of each combat encounter, you gain a level if you survive " +
+    "and did not flee. Leveling up increases a random stat.</p>" +
+    "<p>Each encounter, the opponent gets stronger and more difficult to " +
+    "defeat. See how many encounters you can survive!</p>";
 
   var beginPlayButton = defineButton("Click to play!");
   beginPlayButton.onclick = function() {
@@ -404,87 +413,3 @@ function displayIntro() {
 /* START GAME */
 
 displayIntro();
-
-/* THE GAME FLOW
-
- displayIntro() -- headertext ID with a paragraph to explain the game
-                     also sets up buttonMenu with "Begin play" button.
-
-  onClick, begin play -- sets up combatant message, switches header text to
-                      round info, gameMessage says something like "Select your
-                      action." buttonMenu displays combat actions
-
-                      setupNewCombat()
-                        displayRoundHeader()
-                        displayNewStats()
-                          updatePlayerHP()
-                          updateMonsterHP()
-                        displayCombatMenu()
-
-
-  NEW MENU/DISPLAY -- COMBAT
-
-  onClick, attack -- Player attacks, new message to header text, check if
-                    monster alive, monster attacks, new message to header text,
-                    check if player alive. End combat as appropriate and
-                    display game over or new round info
-
-                    actionAttack()
-                      playerAttacks()
-                      monsterAttacks()
-                      updateCombatRound()
-                        displayRoundHeader()
-                        updatePlayerHP()
-                        updateMonsterHP()
-                        updateGameMessage()
-                      if player dies: displayPlayNewGameMenu()
-                      if monster dies: displayNewEncounterMenu()
-                      if continues: Already taken care of!
-
-  onlick, heal -- Player heals, check for backfire and death. Monster attacks.
-                  Check for death. End combat as appropriate.
-
-                  actionHeal()
-                    playerHeals()
-                      if die: updateCombatRound()*
-                              displayNewGameMenu()
-                    monsterAttacks()
-                    updateCombatRound()*
-                    if continues: keep menus
-
-  onclick, flee -- Monster gets free attack. If survive, end combat and
-                  continue without leveling up.
-
-                  actionFlee()
-                    monsterAttacks()
-                    updateCombatRound()*
-                    if player dies: displayPlayNewGameMenu()
-                    if player survives: displayNewEncounterMenu()
-
-  END COMBAT MENUS
-
-  onclick, level up -- go through level up routine.
-                  display what levels up in headerMessage/gameMessage
-                  instantly update combat stats, do new round buttonMenu
-
-                  playerLevelsUp()
-                  monsterLevelsUP()
-                  combatRound = 1
-                  setupNewCombat()*
-
-  onclick, new encounter -- survival after fleeing
-
-                  monsterLevelsUp()
-                  combatRound = 1
-                  setupNewCombat()*
-
-  END GAME MENUS
-
-  onclick, play again -- reset player and monster info. begin new combat
-                  round
-
-                  resetCombatantStats()
-                  combatRound = 1
-                  setupNewCombat()*
-
-*/
