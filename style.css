@@ -6,13 +6,20 @@ main {
 }
 
 #display {
-  background-color: DarkGrey;
-  color: Black;
   width: 95%;
   max-width: 1000px;
+  background: url("gladiator.jpg");
+  background-size: cover;
   margin: auto;
+}
+
+#statsAndStuff {
+  background-color: rgb(150, 150, 150, .8);
+  color: Black;
+  width: 75%;
   vertical-align: middle;
   padding: 100px 0px;
+  margin: auto;
 }
 
 h1 {

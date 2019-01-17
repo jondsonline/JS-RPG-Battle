@@ -58,28 +58,28 @@ const stat = {
 var pc = new Player(stat.pcHP, stat.pcAC, stat.pcDamage);
 var monster = new Creature(stat.monsterHP, stat.monsterAC, stat.monsterDamage);
 
-var headerMessageText;
 var gameMessageText;
 var combatRound = 0;
-// var gameContinues = true;   // is this even needed?
 var doesPlayerLevelUp = true;
 var fleeChances = Math.floor((Math.random() * 4) + 2);
+var encounterNumber = 1;
 
 function resetStats() {
   combatRound = 0;
+  encounterNumber = 1;
 
   pc.alive = true;
   pc.level = 1;
   pc.maxHitPoints = stat.pcHP;
   pc.hitPoints = pc.maxHitPoints;
   pc.armorClass = stat.pcAC;
-  pc.damage = stat.pcDamage;
+  pc.attackDamage = stat.pcDamage;
 
   monster.level = 1;
   monster.maxHitPoints = stat.monsterHP;
   monster.hitPoints = monster.maxHitPoints;
   monster.armorClass = stat.monsterAC;
-  monster.damage = stat.monsterDamage;
+  monster.attackDamage = stat.monsterDamage;
 }
 
 
@@ -141,7 +141,8 @@ function updateMonsterHP() {
 
 function displayRoundHeader() {
   roundHeader = document.getElementById("headerMessage");
-  roundHeader.innerHTML = "<h2>Round " + combatRound + "</h2>";
+  roundHeader.innerHTML = "<h2>Battle " + encounterNumber +
+                          "<br>Round " + combatRound + "</h2>";
 
   tableHeader = document.getElementById('tableHeader');
   tableHeader.innerHTML = "<th>Player - Level " + pc.level + "</th>" +
@@ -158,6 +159,12 @@ function displayNewStats() {
 }
 
 
+function displayGameMessage(message) {
+  gameMessage = document.getElementById("gameMessage");
+  gameMessage.innerHTML = "<p>" + message + "</p>";
+}
+
+
 function updateCombatRound() {
     combatRound += 1;
     displayRoundHeader();
@@ -166,7 +173,7 @@ function updateCombatRound() {
 }
 
 
-function startNewRound() {
+function startNewEncounter() {
   combatRound = 0;
   displayRoundHeader();
   displayNewStats();
@@ -218,13 +225,8 @@ function levelUp() {
   }
   doesPlayerLevelUp = true;
   monsterLevelsUp();
-  startNewRound();
-}
-
-
-function displayGameMessage(message) {
-  gameMessage = document.getElementById("gameMessage");
-  gameMessage.innerHTML = "<p>" + message + "</p>";
+  encounterNumber += 1;
+  startNewEncounter();
 }
 
 
@@ -271,6 +273,33 @@ function playerHeals() {
     gameMessageText = "You healing spell heals " + healChance + " hit points.";
   }
 }
+
+
+function displayCombatMenu() {
+  clearButtonMenu();
+
+  // Attack Button
+  var attackButton = defineButton("Attack");
+  attackButton.onclick = function() {
+    actionAttack();
+  }
+  addButton(attackButton);
+
+  // Heal Button
+  var healButton = defineButton("Heal");;
+  healButton.onclick = function() {
+    actionHeal();
+  }
+  addButton(healButton);
+
+  // Flee button
+  var fleeButton = defineButton("Flee")
+  fleeButton.onclick = function() {
+    actionFlee();
+  }
+  addButton(fleeButton);
+
+} // displayCombatMenu()
 
 
 function displayDeathMenu() {
@@ -344,34 +373,6 @@ function actionFlee() {
   }
   displayGameMessage(gameMessageText);
 }
-
-
-function displayCombatMenu() {
-  clearButtonMenu();
-
-  // Attack Button
-
-  var attackButton = defineButton("Attack");
-  attackButton.onclick = function() {
-    actionAttack();
-  }
-  addButton(attackButton);
-
-  // Heal Button
-  var healButton = defineButton("Heal");;
-  healButton.onclick = function() {
-    actionHeal();
-  }
-  addButton(healButton);
-
-  // Flee button
-  var fleeButton = defineButton("Flee")
-  fleeButton.onclick = function() {
-    actionFlee();
-  }
-  addButton(fleeButton);
-
-} // displayCombatMenu()
 
 
 function setupNewCombat() {
