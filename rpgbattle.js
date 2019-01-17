@@ -67,6 +67,7 @@ var encounterNumber = 1;
 function resetStats() {
   combatRound = 0;
   encounterNumber = 1;
+  fleeChances = Math.floor((Math.random() * 4) + 2);
 
   pc.alive = true;
   pc.level = 1;
@@ -366,12 +367,15 @@ function actionFlee() {
   if (pc.alive) {
     gameMessageText += "<br>You escape!";
     displaySurvivalMenu();
-  }
-  fleeChances -= 1;
-  if (fleeChances == 0) {
-    gameMessageText += "<br>After fleeing so many battles, you are disgraced." +
-                      "<br>You are forbidden from returning to the arena!";
-    displayDeathMenu();
+    fleeChances -= 1;
+    if (fleeChances == 0) {
+      gameMessageText += "<br>After fleeing so many battles," +
+                        "<br>you are disgraced." +
+                        "<br>You are forbidden from returning to the arena!";
+      displayDeathMenu();
+    } else {
+      pc.hitPoints = pc.maxHitPoints;
+    }
   }
   displayGameMessage(gameMessageText);
 }
@@ -388,25 +392,32 @@ function setupNewCombat() {
 // INTRO SCREEN TO THE GAME
 
 function displayIntro() {
-  var introMessage = document.getElementById("headerMessage");
+  var introHeader = document.getElementById("headerMessage");
 
-  introMessage.innerHTML = "<h2>Welcome to the game!</h2>" +
-    "<p>RPG Battle is a basic game where you battle against various opponents" +
+  introHeader.innerHTML = "<h2>Welcome to the game!</h2>";
+
+  gameMessageText =  "<p>RPG Battle is a basic game where you battle " +
+    "against various opponents" +
     " and level up each time you achieve a victory.</p>" +
     "<p>Each round, you may attack, heal or flee. If you attack, you have a " +
     "chance to hit your opponent and cause damage. If you choose to heal, you " +
     "cast a heal spell, which has a slight chance of backfiring. If it does, " +
-    "instead of healing you take one point of damage. If you choose to flee," +
-    "the opponent gets an extra attack, and if you survive, battle ends. " +
+    "instead of healing you take one point of damage. If you choose to flee, " +
+    "the opponent gets an extra attack. " +
     "There are a limited amount of times you can flee from battle before " +
     "you are disgraced and ejected from the competition.</p>" +
-    "<p>And the end of each combat encounter, you gain a level if you survive " +
-    "and did not flee. Leveling up increases a random stat.</p>" +
+    "<p>And the end of each combat encounter, you gain a level if you " +
+    "survive and did not flee. Leveling up increases a random stat.</p>" +
     "<p>Each encounter, the opponent gets stronger and more difficult to " +
     "defeat. See how many encounters you can survive!</p>";
 
+  displayGameMessage(gameMessageText);
+
   var beginPlayButton = defineButton("Click to play!");
   beginPlayButton.onclick = function() {
+    gameMessageChange =  document.getElementById('gameMessage');
+    gameMessageChange.style.textAlign = "center";
+    gameMessageChange.style.height = "125px";
     setupNewCombat();
   }
   addButton(beginPlayButton);
