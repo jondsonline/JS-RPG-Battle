@@ -348,8 +348,10 @@ function actionAttack() {
 function actionHeal() {
   playerHeals();
   checkIfPlayerAlive();
-  monsterAttacks();
-  checkIfPlayerAlive();
+  if (pc.alive) {
+    monsterAttacks();
+    checkIfPlayerAlive();
+  }
   displayGameMessage(gameMessageText);
   updateCombatRound();
 }
