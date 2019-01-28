@@ -188,11 +188,10 @@ function playerLevelsUp() {
 
   var increasedStat = Math.floor((Math.random() * 10) + 1);
 
-  if (increasedStat >= 1 || increasedStat <= 5) {
+  if (increasedStat >= 1 && increasedStat <= 5) {
     var hpIncrease = Math.floor((Math.random() * 4) + 2);
     pc.maxHitPoints += hpIncrease;
-    pc.hitPoints = pc.maxHitPoints;
-  } else if (increasedStat >= 6 || increasedStat <= 8) {
+  } else if (increasedStat >= 6 && increasedStat <= 8) {
     pc.attackDamage += 1;
   } else if (increasedStat == 9) {
     pc.healing += 1
@@ -201,9 +200,9 @@ function playerLevelsUp() {
       pc.armorClass += 1;
     } else {
       pc.maxHitPoints += 6;
-      pc.hitPoints = pc.maxHitPoints;
     }
   }
+  pc.hitPoints = pc.maxHitPoints;
 }
 
 
