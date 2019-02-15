@@ -261,7 +261,7 @@ function monsterAttacks() {
 function playerHeals() {
   healChance = Math.floor((Math.random() * pc.healing) + 1);
 
-  if (healChance == pc.healing) {
+  if (healChance == 1) {
     gameMessageText = "The healing spell backfires! You take 1 point of " +
                       " damage!";
     pc.takeDamage(1);
